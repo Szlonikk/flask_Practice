@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    TARGET_HOST = "ec2-51-20-18-29.eu-north-1.compute.amazonaws.com"
+    TARGET_HOST = "ec2-13-60-202-155.eu-north-1.compute.amazonaws.com"
     TARGET_USER = "ec2-user"
     SSH_CRED    = "ec2-target-ssh"
     APP_DIR     = "/opt/flask-practice"
