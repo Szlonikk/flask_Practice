@@ -2,14 +2,10 @@ pipeline {
   agent any
 
   environment {
-    TARGET_HOST = "ec2-51-20-18-29.eu-north-1.compute.amazonaws.com" // EC2 #2
+    TARGET_HOST = "ec2-51-20-18-29.eu-north-1.compute.amazonaws.com"
     TARGET_USER = "ec2-user"
     SSH_CRED    = "ec2-target-ssh"
     APP_DIR     = "/opt/flask-practice"
-  }
-
-  triggers {
-    // webhook odpali build; to tylko informacyjnie – trigger masz też w UI
   }
 
   stages {
@@ -27,7 +23,7 @@ pipeline {
       }
     }
 
-    stage('Deploy to EC2 #2') {
+    stage('Deploy') {
       steps {
         sshagent(credentials: [env.SSH_CRED]) {
           sh '''
@@ -36,31 +32,20 @@ pipeline {
             ssh -o StrictHostKeyChecking=no ${TARGET_USER}@${TARGET_HOST} "
               set -e
               TS=\$(date +%Y%m%d%H%M%S)
-
               mkdir -p ${APP_DIR}/releases/\$TS
               tar -xzf /tmp/app.tar.gz -C ${APP_DIR}/releases/\$TS
 
-              # deps
               ${APP_DIR}/venv/bin/pip install -r ${APP_DIR}/releases/\$TS/requirements.txt
 
-              # switch current
               rm -rf ${APP_DIR}/current
               ln -s ${APP_DIR}/releases/\$TS ${APP_DIR}/current
 
               sudo systemctl daemon-reload
               sudo systemctl restart flask-practice
-              sudo systemctl restart httpd
+              sudo systemctl restart httpd || sudo systemctl restart apache2
             "
           '''
         }
-      }
-    }
-
-    stage('Health check') {
-      steps {
-        sh '''
-          curl -fsS http://${TARGET_HOST}/ || true
-        '''
       }
     }
   }
