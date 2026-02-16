@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Webhoook test') {
+        stage('Webhok test') {
             steps {
                 echo 'Webhook działa 🚀'
                 sh 'date'
